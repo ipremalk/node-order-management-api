@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 
-import { User } from "../models/user.model.js";
+import { createUserService, getUserByIdService, getUsersService, deleteUserService, updateUserService } from "../services/user.service.js";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -11,7 +11,7 @@ export const createUser = async (req: Request, res: Response) => {
                 "message": "name and email are required"
             });
         }
-        const user = await User.create({ name, email });
+        const user = await createUserService(name, email);
         return res.status(201).json({
             "message": "User is created",
             user
@@ -30,7 +30,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (_req: Request, res: Response) => {
      try {
-            const users = await User.find({});
+            const users = await getUsersService();
             
             return res.status(200).json({
                 users
@@ -50,7 +50,7 @@ export const getUserById = async (req: Request, res: Response) => {
                     "message": "Invalid user ID"
                 });
             }
-            const user = await User.findById(id);
+            const user = await getUserByIdService(id);
             if (!user) {
                 return res.status(404).json({
                     "message": "User not found"
@@ -83,7 +83,7 @@ export const updateUser = async (req: Request, res: Response) => {
         const updateObject: { name? : string, email? : string } = {};
         if (name) updateObject.name = name;
         if (email) updateObject.email = email;
-        const update = await User.findByIdAndUpdate(id, updateObject, { new: true });
+        const update = await updateUserService(id, updateObject);
         if (!update) {
             return res.status(404).json({
                 message: "User not found"
@@ -108,7 +108,7 @@ export const deleteUser = async (req: Request, res: Response) => {
                 "message": "Invalid user ID"
             });
         }
-        const user = await User.findByIdAndDelete(id);
+        const user = await deleteUserService(id);
         if (!user) {
             return res.status(404).json({
                 "message": "User not found"
