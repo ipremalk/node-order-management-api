@@ -1,34 +1,22 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 
 import { createUserService, getUserByIdService, getUsersService, deleteUserService, updateUserService } from "../services/user.service.js";
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { name, email } = req.body;
-        if (!name || !email) {
-            return res.status(400).json({
-                "message": "name and email are required"
-            });
-        }
         const user = await createUserService(name, email);
         return res.status(201).json({
             "message": "User is created",
             user
         });
     } catch (err: any) {
-        if (err?.code === 11000) {
-            return res.status(409).json({
-                "message": "User with this email already exists"
-            });
-        }
-        return res.status(500).json({
-            "message": "Internal server error"
-        });
+        next(err);
     }
 };
 
-export const getUsers = async (_req: Request, res: Response) => {
+export const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
      try {
             const users = await getUsersService();
             
@@ -36,13 +24,11 @@ export const getUsers = async (_req: Request, res: Response) => {
                 users
             });
         } catch (err) {
-            return res.status(500).json({
-                "message": "Internal server error"
-            });
+            next(err);
         }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
             const { id } = req.params as { id: string };
             if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -60,13 +46,11 @@ export const getUserById = async (req: Request, res: Response) => {
                 user
             });
         } catch (err) {
-            return res.status(500).json({
-                "message": "Internal server error"
-            });
+            next(err);
         }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params as { id: string };
         const { name, email } = req.body;
@@ -94,13 +78,11 @@ export const updateUser = async (req: Request, res: Response) => {
         });
 
     } catch (err) {
-        return res.status(500).json({
-            "message": "Internal server error"
-        });
+        next(err);
     }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params as { id: string };
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -118,8 +100,6 @@ export const deleteUser = async (req: Request, res: Response) => {
             "message": "User deleted successfully"
         });
     } catch (err) {
-        return res.status(500).json({
-            "message": "Internal server error"
-        });
+        next(err);
     }
 };
