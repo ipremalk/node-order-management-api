@@ -75,4 +75,62 @@ app.get("/users/:id", async (req, res) => {
     }
 });
 
+app.patch("/users/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                "message": "User ID is invalid"
+            });
+        }
+        if (!name && !email) {
+            return res.status(400).json({
+                "message": "name or email must be required"
+            });
+        }
+        const updateObject: { name? : string, email? : string } = {};
+        if (name) updateObject.name = name;
+        if (email) updateObject.email = email;
+        const update = await User.findByIdAndUpdate(id, updateObject, { new: true });
+        if (!update) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+        return res.status(200).json({
+            message: "User updated"
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            "message": "Internal server error"
+        });
+    }
+});
+
+app.delete("/users/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                "message": "Invalid user ID"
+            });
+        }
+        const user = await User.findByIdAndDelete(id);
+        if (!user) {
+            return res.status(404).json({
+                "message": "User not found"
+            });
+        }
+        return res.status(200).json({
+            "message": "User deleted successfully"
+        });
+    } catch (err) {
+        return res.status(500).json({
+            "message": "Internal server error"
+        })
+    }
+});
+
 export default app;
