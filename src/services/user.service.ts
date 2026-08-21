@@ -4,10 +4,31 @@ export const createUserService = async (name: string, email: string) => {
     return User.create({ name, email });
 };
 
-export const getUsersService = async (page: number, limit: number) => {
+export const getUsersService = async (page: number, limit: number, search: string, sortBy: string, order: 1 | -1) => {
     const skip = (page - 1) * limit;
-    const users = User.find({}).skip(skip).limit(limit);
-    const total = User.countDocuments();
+
+    const filter: any = {};
+
+    if (search) {
+        filter.$or = [
+            {
+                name: {
+                    $regex: search,
+                    $options: "i",
+                },
+                email: {
+                    $regex: search,
+                    $options: "i",
+                }
+            }
+        ]
+    }
+
+    const users = await User.find(filter)
+        .sort({ [sortBy]: order })
+        .skip(skip)
+        .limit(limit);
+    const total = await User.countDocuments();
 
     return { users, total };
 };
