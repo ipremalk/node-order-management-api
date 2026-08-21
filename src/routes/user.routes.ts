@@ -1,11 +1,12 @@
 import Router from "express";
 
 import { createUser, getUsers, getUserById, updateUser, deleteUser } from "../controllers/user.controllers.js";
-import { validationCreateUser } from "../middleware/user.validation.js";
+import { validate } from "../middleware/validate.middleware.js";
+import { createUserSchema } from "../validators/user.validator.js";
 
 const router = Router();
 
-router.post("/", validationCreateUser, createUser);
+router.post("/", validate(createUserSchema), createUser);
 
 router.get("/", getUsers);
 

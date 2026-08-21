@@ -4,8 +4,12 @@ export const createUserService = async (name: string, email: string) => {
     return User.create({ name, email });
 };
 
-export const getUsersService = async () => {
-    return User.find({});
+export const getUsersService = async (page: number, limit: number) => {
+    const skip = (page - 1) * limit;
+    const users = User.find({}).skip(skip).limit(limit);
+    const total = User.countDocuments();
+
+    return { users, total };
 };
 
 export const getUserByIdService = async (id: string) => {

@@ -16,12 +16,19 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
+export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
      try {
-            const users = await getUsersService();
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 10;
+            const { users, total }: any = await getUsersService(page, limit);
+            const totalPages = Math.ceil(total / limit);
             
             return res.status(200).json({
-                users
+                page,
+                limit,
+                users,
+                total,
+                totalPages
             });
         } catch (err) {
             next(err);
